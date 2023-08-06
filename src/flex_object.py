@@ -1,0 +1,2 @@
+class FlexObject(object):
+    pass
