@@ -3,7 +3,7 @@ from types import MethodType
 
 class FlexObject():
     def __init__(self, **attrs) -> None:
-        self.set_attrs(attrs)
+        self.set_attrs(**attrs)
 
     def set_attrs(self, **attrs) -> None:
         for name, value in attrs.items():
@@ -21,13 +21,10 @@ class FlexObject():
                 continue
             else:
                 if hasattr(self, name):
-                    del getattr(self, name)
+                    delattr(self, name)
 
-    def write_excel(self, file_name: str = None, folder_path: str = None, *args, **kwargs) -> None:
+    def to_excel(self, file_name: str = None, folder_path: str = None) -> None:
         pass
 
-    def write_json(self, file_name: str = None, folder_path: str = None, *args, **kwargs) -> None:
-        pass
-
-    def write_txt(self, file_name: str = None, folder_path: str = None, *args, **kwargs) -> None:
+    def to_json(self, file_name: str = None, folder_path: str = None) -> None:
         pass
