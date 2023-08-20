@@ -1,3 +1,4 @@
+from inspect import isfunction, ismethod
 from typing import Any, Dict, Tuple
 from types import MethodType, NoneType
 from os.path import abspath, dirname, join
@@ -10,46 +11,52 @@ class FlexObject(object):
 
     def set_attrs(self, **attrs) -> None:
         for name, value in attrs.items():
-            if callable(value):
-                value = MethodType(value, self)
+            if not name.startswith('_'):
+                if isfunction(value) or ismethod(value):
+                    value = MethodType(value, self)
 
-            setattr(self, name, value)
+                setattr(self, name, value)
 
     def del_attrs(self, *attr_names) -> None:
         for name in attr_names:
-            if type(name) != str:
-                continue
-            else:
-                if hasattr(self, name):
-                    delattr(self, name)
+            if (type(name) == str) and (hasattr(self, name)):
+                delattr(self, name)
 
     @staticmethod
-    def json_safe_types() -> Tuple[type]:
+    def safe_json_types() -> Tuple[type]:
         return (
             NoneType,               # none/null
             bool, float, int, str,  # primitive variables
             dict, list, tuple       # data structures
         )
 
-    def json_safe_attrs(self) -> Dict[str, Any]:
+    def safe_json_attrs(self) -> Dict[str, Any]:
         return {
             name: value
             for name, value in self.__dict__.items()
-            if type(value) in self.json_safe_types()
+            if (
+                (not name.startswith('_')) and
+                (type(value) in self.safe_json_types())
+            )
         }
 
     def to_json(self, indent: int = 4) -> str:
-        data: Dict[str, Any] = self.json_safe_attrs()
+        data: Dict[str, Any] = self.safe_json_attrs()
         json_str: str = json.dumps(data, indent=indent)
         return json_str
 
     def write_json(self, file_path: str = '', indent: int = 4) -> None:
-        if not file_path:
+        if (not file_path) or (not file_path.endswith('.json')):
             file_path = join(
                 abspath(dirname(__file__)),
                 f'{self.__class__.__name__}.json'
             )
-        data: Dict[str, Any] = self.json_safe_attrs()
+        data: Dict[str, Any] = self.safe_json_attrs()
 
         with open(file_path, "w") as json_file:
             json.dump(data, json_file, indent=indent)
+
+    def from_json(self, file_path: str) -> None:
+        with open(file_path, "r") as json_file:
+            attrs: Dict[str, Any] = json.load(json_file)
+            self.set_attrs(**attrs)
