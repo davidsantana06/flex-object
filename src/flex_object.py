@@ -1,6 +1,7 @@
+from os.path import abspath, dirname, join
+from pandas import DataFrame, Series
 from typing import Any, Dict
 from types import MethodType
-from os.path import abspath, dirname, join
 import json
 
 
@@ -33,15 +34,25 @@ class FlexObject(object):
                 if hasattr(self, name):
                     delattr(self, name)
 
-    def to_excel(self, file_path: str = '') -> None:
-        pass
-
-    def to_json(self, file_path: str = '', indent: int = 4) -> None:
-        if not file_path:
+    def __define_file_path(self, file_path: str, file_ext: str) -> str:
+        if (not file_path) or (not file_path.endswith(file_ext)):
             file_path = join(
                 abspath(dirname(__file__)),
-                f'{self.__class__.__name__}.json'
+                f'{self.__class__.__name__}.{file_ext}'
             )
 
+        return file_path
+
+    def to_excel(self, file_path: str = '') -> None:
+        file_path = self.__define_file_path(file_path, 'xlsx')
+        data: Dict[str, Any] = self.all_var_attrs()
+        data_series: Series = Series(data)
+        data_frame: DataFrame = data_series.to_frame().transpose()
+        data_frame.to_excel(file_path, index=False)
+
+    def to_json(self, file_path: str = '', indent: int = 4) -> None:
+        file_path = self.__define_file_path(file_path, 'json')
+        data: Dict[str, Any] = self.all_var_attrs()
+
         with open(file_path, "w") as json_file:
-            json.dump(self.all_var_attrs(), json_file, indent=indent)
+            json.dump(data, json_file, indent=indent)
