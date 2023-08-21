@@ -1,6 +1,5 @@
-from inspect import isfunction, ismethod
 from typing import Any, Dict, Tuple
-from types import FunctionType, MethodType, NoneType
+from types import NoneType
 from os.path import abspath, dirname, join
 import json
 
@@ -11,10 +10,7 @@ class FlexObject(object):
 
     def set_attrs(self, **attrs) -> None:
         for name, value in attrs.items():
-            if not name.startswith('_'):
-                if isfunction(value) or ismethod(value):
-                    value = MethodType(value, self)
-
+            if (not name.startswith('_')) and (not callable(value)):
                 setattr(self, name, value)
 
     def del_attrs(self, *attr_names) -> None:
@@ -50,7 +46,7 @@ class FlexObject(object):
         return json_str
 
     def read_json_file(self, file_path: str) -> None:
-        with open(file_path, "r") as json_file:
+        with open(file_path, 'r') as json_file:
             attrs: Dict[str, Any] = json.load(json_file)
             self.set_attrs(**attrs)
 
@@ -62,5 +58,5 @@ class FlexObject(object):
             )
         attrs: Dict[str, Any] = self.safe_json_attrs()
 
-        with open(file_path, "w") as json_file:
+        with open(file_path, 'w') as json_file:
             json.dump(attrs, json_file, indent=indent)
