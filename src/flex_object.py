@@ -1,6 +1,6 @@
 from inspect import isfunction, ismethod
 from typing import Any, Dict, Tuple
-from types import MethodType, NoneType
+from types import FunctionType, MethodType, NoneType
 from os.path import abspath, dirname, join
 import json
 
@@ -40,23 +40,27 @@ class FlexObject(object):
             )
         }
 
+    def from_json(self, json_str: str) -> None:
+        attrs: Dict[str, Any] = json.load(json_str)
+        self.set_attrs(**attrs)
+
     def to_json(self, indent: int = 4) -> str:
         data: Dict[str, Any] = self.safe_json_attrs()
         json_str: str = json.dumps(data, indent=indent)
         return json_str
 
-    def write_json(self, file_path: str = '', indent: int = 4) -> None:
+    def read_json_file(self, file_path: str) -> None:
+        with open(file_path, "r") as json_file:
+            attrs: Dict[str, Any] = json.load(json_file)
+            self.set_attrs(**attrs)
+
+    def write_json_file(self, file_path: str = '', indent: int = 4) -> None:
         if (not file_path) or (not file_path.endswith('.json')):
             file_path = join(
                 abspath(dirname(__file__)),
                 f'{self.__class__.__name__}.json'
             )
-        data: Dict[str, Any] = self.safe_json_attrs()
+        attrs: Dict[str, Any] = self.safe_json_attrs()
 
         with open(file_path, "w") as json_file:
-            json.dump(data, json_file, indent=indent)
-
-    def from_json(self, file_path: str) -> None:
-        with open(file_path, "r") as json_file:
-            attrs: Dict[str, Any] = json.load(json_file)
-            self.set_attrs(**attrs)
+            json.dump(attrs, json_file, indent=indent)
