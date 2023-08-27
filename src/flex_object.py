@@ -182,7 +182,7 @@ class FlexObject(object):
         >>> flex_obj.age
         21
         '''
-        attrs: Dict[str, Any] = json.load(json_str)
+        attrs: Dict[str, Any] = json.loads(json_str)
         self.set_attrs(**attrs)
 
     def to_json(self, indent: int = 4) -> str:
