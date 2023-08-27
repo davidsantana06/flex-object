@@ -2,27 +2,26 @@
 
 The FlexObject redefines your Python programming experience with its versatile base class, offering an array of dynamic attribute management capabilities, seamless runtime attribute manipulation, effortless JSON serialization, and streamlined JSON file/string handling. This library serves as a cornerstone for simplified data interaction, catering to a wide spectrum of scenarios.
 
-> FlexObject is compatible only with Python 3.*.
+> :information_source: This project has been developed based on Python 3.X versions.
+<br />
 
 
-## 🚀 Features
+
+## :rocket: Features
 
 1. **Dynamic Attribute Management**: Enjoy the freedom to effortlessly manage object attributes on-the-fly, enhancing adaptability to evolving requirements.
-
 2. **Runtime Attribute Addition/Removal**: Streamline your workflow by dynamically adding or removing attributes during execution, minimizing disruptions.
-
 3. **JSON Serialization**: Seamlessly transform object attributes into the JSON format, facilitating convenient storage, sharing, or communication with external systems.
-
 4. **JSON File/String Reading**: Effortlessly load object attributes from JSON files or strings, expediting data retrieval and utilization.
+<br />
 
 
 
-## 📋 Usage
+## :coffee: Usage
 After incorporating FlexObject into your project, the usage will follow the steps outlined below.
 
-
 ```Python
-from flexobject import FlexObject
+from flex_object import FlexObject
 
 # Create a FlexObject instance
 flex_obj = FlexObject()
@@ -42,9 +41,10 @@ flex_obj.write_json_file('data.json')
 # Load attributes from a JSON file
 flex_obj.read_json_file('data.json')
 ```
+<br />
 
 
 
-## 📜 License
+## :balance_scale: License
 
-This project operates under the MIT License, providing you with the flexibility to integrate, modify, and distribute the library as needed.
+This project adopts the **MIT License**, granting you the essential versatility to incorporate, adapt, and distribute the library according to your specific needs.
