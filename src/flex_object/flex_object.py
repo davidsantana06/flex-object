@@ -1,17 +1,19 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 from types import NoneType
 from os.path import abspath, dirname, join
 import json
 
 
 class FlexObject(object):
+    SAFE_JSON_TYPES = (NoneType, bool, float, int, str, dict, list, tuple)
+
     def __init__(self, **attrs) -> None:
         '''
         Initialize the object with specified attributes.
 
         This method is the constructor for the class. It initializes the object by
-        calling the `set_attrs` method with the provided keyword arguments, which
-        sets the attributes based on the provided values.
+        calling the `set` method with the provided keyword arguments, which sets the 
+        attributes based on the provided values.
 
         Parameters:
         ----------
@@ -30,14 +32,14 @@ class FlexObject(object):
         >>> flex_obj.age
         21
         '''
-        self.set_attrs(**attrs)
+        self.set(**attrs)
 
-    def set_attrs(self, **attrs) -> None:
+    def set(self, **attrs) -> None:
         '''
         Set attributes for the object.
 
         This method is responsible for assigning a set of attributes to the object.
-        The format of the attributes is provided by **kargs, which means that each
+        The format of the attributes is provided by **kwargs, which means that each
         attribute must be defined individually.
 
         Parameters:
@@ -52,17 +54,17 @@ class FlexObject(object):
         Examples:
         --------
         >>> flex_obj: FlexObject = FlexObject()
-        >>> flex_obj.set_attrs(developer='David Santana', github='davidsantana06')
+        >>> flex_obj.set(developer='David Santana', github='davidsantana06')
         >>> flex_obj.developer
         'David Santana'
         >>> flex_obj.github
         'davidsantana06'
         '''
         for name, value in attrs.items():
-            if (not name.startswith('_')) and (not callable(value)):
+            if not name.startswith('_'):
                 setattr(self, name, value)
 
-    def del_attrs(self, *attr_names) -> None:
+    def delete(self, *attr_names) -> None:
         '''
         Delete attributes from the object.
 
@@ -83,7 +85,7 @@ class FlexObject(object):
         >>> flex_obj = FlexObject(developer='David Santana', github='davidsantana06')
         >>> hasattr(flex_obj, 'developer')
         True
-        >>> flex_obj.del_attrs('developer')
+        >>> flex_obj.delete('developer')
         >>> hasattr(flex_obj, 'developer')
         False
         '''
@@ -91,39 +93,8 @@ class FlexObject(object):
             if (type(name) == str) and (hasattr(self, name)):
                 delattr(self, name)
 
-    @staticmethod
-    def safe_json_types() -> Tuple[type]:
-        '''
-        Return a tuple of safe JSON-compatible data types.
-
-        This static method returns a tuple of data types that are safe to use in JSON
-        serialization and deserialization.
-
-        Returns:
-        -------
-        Tuple[type]
-            A tuple containing data types suitable for JSON representation.
-
-        Examples:
-        --------
-        >>> safe_types = FlexObject.safe_json_types()
-        >>> isinstance(None, safe_types)
-        True
-        >>> isinstance(42, safe_types)
-        True
-        >>> isinstance("Hello", safe_types)
-        True
-        >>> isinstance({}, safe_types)
-        True
-        '''
-        return (
-            NoneType,               # none/null
-            bool, float, int, str,  # primitive variables
-            dict, list, tuple       # data structures
-        )
-
     def safe_json_attrs(self) -> Dict[str, Any]:
-        """
+        '''
         Return a dictionary of safe JSON-compatible attributes.
 
         This method returns a dictionary containing attribute names and values from
@@ -144,24 +115,20 @@ class FlexObject(object):
         True
         >>> bool('_secret' in safe_attrs)
         False
-        """
+        '''
         return {
             name: value
             for name, value in self.__dict__.items()
-            if (
-                (not name.startswith('_')) and
-                (type(value) in self.safe_json_types())
-            )
+            if (not name.startswith('_')) and (type(value) in self.SAFE_JSON_TYPES)
         }
 
-    def from_json(self, json_str: str) -> None:
+    def loads_json(self, json_str: str) -> None:
         '''
         Initialize object attributes from a JSON string.
 
         This method initializes the object's attributes by loading them from a JSON
         string. The JSON data is expected to represent a dictionary of attribute names
-        and values. The `set_attrs` method is then used to assign these attributes to
-        the object.
+        and values. The `set` method is then used to assign these attributes to the object.
 
         Parameters:
         ----------
@@ -176,16 +143,16 @@ class FlexObject(object):
         --------
         >>> json_str = '{"name": "David Santana", "age": 21}'
         >>> flex_obj = FlexObject()
-        >>> flex_obj.from_json(json_str)
+        >>> flex_obj.loads_json(json_str)
         >>> flex_obj.name
         'David Santana'
         >>> flex_obj.age
         21
         '''
-        attrs: Dict[str, Any] = json.loads(json_str)
-        self.set_attrs(**attrs)
+        attrs = json.loads(json_str)
+        self.set(**attrs)
 
-    def to_json(self, indent: int = 4) -> str:
+    def dumps_json(self, indent: int = 4) -> str:
         '''
         Convert object attributes to a JSON-formatted string.
 
@@ -207,29 +174,31 @@ class FlexObject(object):
         Examples:
         --------
         >>> flex_obj = FlexObject(name='David Santana', age=21)
-        >>> json_str = flex_obj.to_json()
+        >>> json_str = flex_obj.dumps_json()
         >>> print(json_str)
         {
             "name": "David Santana",
             "age": 21
         }
         '''
-        data: Dict[str, Any] = self.safe_json_attrs()
-        json_str: str = json.dumps(data, indent=indent)
+        attrs = self.safe_json_attrs()
+        json_str = json.dumps(attrs, indent=indent)
         return json_str
 
-    def read_json_file(self, file_path: str) -> None:
+    def load_json(self, file_path: str, enconding: str = None) -> None:
         '''
         Read and load object attributes from a JSON file.
 
         This method reads a JSON file located at the specified 'file_path' and loads
-        its content as attributes for the object. The `set_attrs` method is then used
+        its content as attributes for the object. The `set` method is then used
         to assign these attributes to the object.
 
         Parameters:
         ----------
         file_path : str
             The path to the JSON file containing attribute data.
+        enconding : str, optional
+            The encoding used to read the JSON file. Default is None.
 
         Returns:
         -------
@@ -239,17 +208,17 @@ class FlexObject(object):
         --------
         Let's assume the JSON file contains: {"name": "David Santana", "age": 21}
         >>> flex_obj = FlexObject()
-        >>> flex_obj.read_json_file('../data.json')
+        >>> flex_obj.load_json('../data.json')
         >>> flex_obj.name
         'David Santana'
         >>> flex_obj.age
         21
         '''
-        with open(file_path, 'r') as json_file:
-            attrs: Dict[str, Any] = json.load(json_file)
-            self.set_attrs(**attrs)
+        with open(file_path, 'r', encoding=enconding) as json_file:
+            attrs = json.load(json_file)
+            self.set(**attrs)
 
-    def write_json_file(self, file_path: str = '', indent: int = 4) -> None:
+    def dump_json(self, file_path: str = '', indent: int = 4, encoding: str = None) -> None:
         '''
         Write object attributes to a JSON file.
 
@@ -266,6 +235,8 @@ class FlexObject(object):
         indent : int, optional
             The number of spaces used for indentation in the resulting JSON file. Default
             is 4.
+        encoding : str, optional
+            The encoding used to write the JSON file. Default is None.
 
         Returns:
         -------
@@ -274,7 +245,7 @@ class FlexObject(object):
         Examples:
         --------
         >>> flex_obj = FlexObject(name='David Santana', age=21)
-        >>> flex_obj.write_json_file('../data.json')
+        >>> flex_obj.dump_json('../data.json')
         # A JSON file 'data.json' is created with contents:
         # {
         #     "name": "David Santana",
@@ -282,11 +253,8 @@ class FlexObject(object):
         # }
         '''
         if (not file_path) or (not file_path.endswith('.json')):
-            file_path = join(
-                abspath(dirname(__file__)),
-                f'{self.__class__.__name__}.json'
-            )
-        attrs: Dict[str, Any] = self.safe_json_attrs()
+            file_path = join(abspath(dirname(__file__)), f'{self.__class__.__name__}.json')
 
-        with open(file_path, 'w') as json_file:
+        attrs = self.safe_json_attrs()
+        with open(file_path, 'w', encoding=encoding) as json_file:
             json.dump(attrs, json_file, indent=indent)
