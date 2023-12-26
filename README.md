@@ -3,7 +3,7 @@
 The FlexObject redefines your Python programming experience with its versatile base class, offering an array of dynamic attribute management capabilities, seamless runtime attribute manipulation, effortless JSON serialization, and streamlined JSON file/string handling. This library serves as a cornerstone for simplified data interaction, catering to a wide spectrum of scenarios.
 
 > **Note**
-> This project has been developed based on Python 3.X versions.
+> This project has been developed based on Python 3.6 or above.
 
 <br />
 
@@ -31,19 +31,19 @@ from flex_object import FlexObject
 flex_obj = FlexObject()
 
 # Set attributes dynamically
-flex_obj.set_attrs(name='David Santana', github='davidsantana06', age=21)
+flex_obj.set(name='David Santana', github='davidsantana06', age=21)
 
 # Serialize attributes to JSON string
-json_str = flex_obj.to_json()
+json_str = flex_obj.dumps_json()
 
 # Deserialize attributes from JSON string
-flex_obj.from_json(json_str)
+flex_obj.loads_json(json_str)
 
 # Store attributes in a JSON file
-flex_obj.write_json_file('data.json')
+flex_obj.dump_json('data.json')
 
 # Load attributes from a JSON file
-flex_obj.read_json_file('data.json')
+flex_obj.load_json('data.json')
 ```
 
 <br />
