@@ -1,12 +1,11 @@
-from typing import Any, Dict
-from types import NoneType
 from os import getcwd
-from os.path import abspath, dirname, join
+from os.path import join
+from typing import Any, Dict
 import json
 
 
 class FlexObject(object):
-    SAFE_JSON_TYPES = (NoneType, bool, float, int, str, dict, list, tuple)
+    SAFE_JSON_TYPES = (type(None), bool, float, int, str, dict, list, tuple)
 
     def __init__(self, **attrs) -> None:
         '''
