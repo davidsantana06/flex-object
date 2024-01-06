@@ -1,5 +1,6 @@
 from typing import Any, Dict
 from types import NoneType
+from os import getcwd
 from os.path import abspath, dirname, join
 import json
 
@@ -253,7 +254,7 @@ class FlexObject(object):
         # }
         '''
         if (not file_path) or (not file_path.endswith('.json')):
-            file_path = join(abspath(dirname(__file__)), f'{self.__class__.__name__}.json')
+            file_path = join(getcwd(), f'{self.__class__.__name__}.json')
 
         attrs = self.safe_json_attrs()
         with open(file_path, 'w', encoding=encoding) as json_file:
